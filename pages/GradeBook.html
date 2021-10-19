@@ -1,0 +1,164 @@
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+		<title>All Grades</title>
+
+		<meta name="viewport" content="width=device-width">
+
+		<link rel="stylesheet" href="css/bootstrap.css">
+		<link rel="stylesheet" href="css/ColVis.css">
+		<link rel="stylesheet" href="css/style.css">
+
+	</head>
+	<body>
+
+		<!-- some internationalized text accessible to javascript -->
+		<div id="column_title_name" class="hide">Name</div>
+		<div id="column_title_ID" class="hide">ID</div>
+		<div id="column_title_grade" class="hide">Grade</div>
+
+		<header id="all-grades-header" class="clearfix">
+			<h1 class="fl">All Grades</h1>
+			<div id="course-average" class="fl">
+				<p>Course Average: <span class="grade-value">B+</span></p>
+			</div><!-- /course-average -->
+			<dl id="export-options" class="fr clearfix">
+				<dt class="fl">Export:</dt>
+				<dd><button type="button" class="faux-link">PDF</button></dd>
+				<dd><button type="button" class="faux-link">CSV</button></dd>
+				<dd><button type="button" class="faux-link">XLS</button></dd>
+			</dl>
+		</header><!-- /header -->
+
+		<div id="view" class="fl hidden">
+			View:
+			<select id="category-dropdown" name="categories">
+				<!-- populated based on JSON data -->
+			</select>
+		</div>
+
+		<!-- data table -->
+		<table id="gradebook-container">
+			<thead>
+				<tr id="col-header" class="header">
+
+				</tr>
+			</thead>
+			<tbody id="gradebook-data">
+
+			</tbody>
+		</table>
+
+		<div id="legend" class="">
+			<button type="button" class="faux-link">Show Legend</button>
+			<ul id="legend-content" class="hidden">
+				<li>* Grades in parentheses () are not included in the category average or course grade calculations.</li>
+				<li>** Items with a grey background are not released to students.</li>
+				<li>Dropped grades are struck out.</li>
+			</ul><!-- /legend-content -->
+			
+		</div><!-- /legend -->
+
+ <!-- doT.js templating -->
+  
+		<!-- Column Headers (th) -->
+		<script id="header-tmpl" type="text/x-dot-template">
+			{{~it :value:index}}
+				{{? value !== "Name" && value !== "ID" }}
+					<th class="grade">
+				{{??}}
+					<th>
+				{{?}}
+					{{=value}}</th>
+			{{~}}			
+		</script>
+
+		<!-- each grade row -->
+		<script id="row-tmpl" type="text/x-dot-template">
+			/*{{ console.log(it); }}*/
+			{{ var studentIds = Object.keys(it.users); }}
+
+			{{~studentIds :studentId:i}}
+				{{var student = it.users[studentId];}}
+				<tr>
+					/* Partial template 'student-info' */
+					{{#def.studentInfo}}
+
+					/* Category Score */
+					{{#def.categories}}
+
+				</tr>
+			{{~}}
+		</script>
+
+		<script id="students-tmpl" type="text/x-dot-template">
+			<td class="name">{{=student.sortName}}</td>
+			<td class="username">{{=student.displayId}}</td>
+
+			{{? student.isClassGradeUserEntered }}
+				<td class="class-grade"><span title="{{=student.classGradePercent}}"><{{=student.classGrade}} *({{=student.classGradePercent}}%)</span></td>
+			{{??}}
+				<td class="class-grade">{{=student.classGrade}} (<span title="{{=student.classGradePercent}}">{{=student.classGradePercent}}</span>%)</td>
+			{{?}}
+
+		</script>
+
+	   <!-- include for row-tmpl -->
+		<script id="categories-tmpl" type="text/x-dot-template">
+			/* loop through categories and asignments */
+			{{~it.gradebookItems :item:j}}
+				{{
+					var grade = student.grades[item.id];
+					var gradeType;
+				}}
+
+				{{? item.itemType === "Percentage" }}
+					{{ gradeType = "%"; }}
+				{{?? }}
+					{{ gradeType = ""; }}
+				{{?}}
+
+				{{? !item }}
+					<td></td>
+					{{?? item.isCategory }}
+						<td class="category-{{=item.categoryId}}"><span title="{{=grade.percent}}">{{=grade.percent}}{{=gradeType }}</span>
+						</td>
+					{{??}}
+						<td class="category-{{=item.categoryId}}"><span title="{{=grade.percent}}">{{=grade.percent}}{{=gradeType }}</span></td>
+				{{?}}
+			{{~}}
+		</script>
+
+		<!-- Template for the category dropdown filter -->
+		<script id="category-dropdown-tmpl" type="text/x-dot-template">
+			<option value="all">Show All Categories</option>
+			
+			{{~it.gradebookItems :item:i}}
+				{{? item.isCategory }}
+					{{ var className = item.id; }}
+					<option value="category-{{=className}}"> {{=item.name}} </option>
+				{{?}}
+			{{~}}
+			
+			<option value="category--1">Unassigned</option>
+
+		</script>
+
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+		<script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.2.min.js"><\/script>')</script>
+
+		<script type="text/javascript" src="js/libs/doT.js"></script>
+		<script type="text/javascript" src="js/plugins.js"></script>
+		<script type="text/javascript" src="js/libs/jquery.dataTables.js"></script>
+		<script type="text/javascript" src="js/libs/ColVis.js"></script>
+		<script type="text/javascript" src="js/libs/bootrap-dataTable.js"></script>
+		<script type="text/javascript" src="js/script.js"></script>
+
+	</body>
+</html>
